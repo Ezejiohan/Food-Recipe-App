@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { createUser, userLogin, verifyUser, changePassword, forgotPassword, getAllUsers, getUser } = require('../controllers/user');
+const { createUser, userLogin, verifyUser, changePassword, forgotPassword, getAllUsers, getUser, resetPassword } = require('../controllers/user');
 const route = express.Router();
 
 route.post('/users', (createUser));

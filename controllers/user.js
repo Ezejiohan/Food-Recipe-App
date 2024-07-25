@@ -109,11 +109,78 @@ const changePassword = asyncWrapper(async (req, res, next) => {
         });
 });
 
+const updateUser = asyncWrapper(async (req, res) => {
+    const { id:userID } = req.params;
+    const user = await User.findByIdAndUpdate({ _id:userID }, req.body, {
+        new: true,
+        runValidators: true,
+    });
+    if (!user) {
+        return next(createCustomError("User not found", 404)) 
+    }
+    res.status(200).json({user});
+});
+
+const forgotPassword = asyncWrapper(async (req, res, next) => {
+        const user = await User.findOne({ email: req.body.email });
+        if (!user) {
+            return next(createCustomError(`User not found`, 404));
+        }
+        const token = jwt.sign({
+            id: user._id,
+            email: user.email
+        }, process.env.TOKEN)
+
+        const passwordChangeLink = `${req.protocol}://${req.get("host")}/api/user/change_password/${user._id}/${token}`;
+        const message = `Click this link: ${passwordChangeLink} to set a new password`;
+
+        sendEmail({
+            email: user.email,
+            subject: 'Forget password link',
+            message: message
+        });
+
+        res.status(200).json({
+            message: "Email has sent"
+        });
+})
+
+const resetPassword = asyncWrapper(async (req, res, next) => {
+        const { newPassword, confirmPassword } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return next(createCustomError(`User not found`, 404));
+        }
+        
+        if (newPassword !== confirmPassword) {
+            return res.status(403).json({
+                message: 'There is a difference in both password'
+            });
+        }
+        
+        const saltPassword = bcrypt.genSaltSync(10);
+        const hashPassword = bcrypt.hashSync(newPassword, saltPassword);
+
+        const updatePassword = await User.findByIdAndUpdate(req.params.id, {
+            password: hashPassword
+        });
+
+        await user.save();
+
+        res.status(200).json({
+            message: 'Password updated successfully',
+            data: updatePassword
+        });
+});
+
 module.exports = { 
     createUser, 
     userLogin,
     verifyUser,
     getAllUsers,
     getUser,
-    changePassword
+    changePassword,
+    updateUser,
+    forgotPassword,
+    resetPassword
 }

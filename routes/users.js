@@ -8,7 +8,7 @@ route.post('/users/loginUser', (userLogin));
 route.get('/users/:id', (verifyUser));
 route.get('/users', (getAllUsers));
 route.get('/users/:id', (getUser))
-route.put('/users', userAuthenticate, (changePassword));
+route.put('/users', (changePassword));
 route.post('/users/forgotPassword', (forgotPassword));
 route.patch('/users/change_password/:id/:token', (resetPassword));
 

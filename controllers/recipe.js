@@ -10,6 +10,12 @@ const createRecipe = asyncWrapper(async(req, res) => {
     res.status(201).json({recipe})
 });
 
+const getAllRecipes = asyncWrapper(async (req, res) => {
+    const recipes = await Recipe.find({}).populate('category, subcategory')
+    res.status(200).json({ recipes })
+})
+
 module.exports = { 
-    createRecipe
+    createRecipe,
+    getAllRecipes
 }

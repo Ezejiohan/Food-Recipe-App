@@ -13,9 +13,19 @@ const createRecipe = asyncWrapper(async(req, res) => {
 const getAllRecipes = asyncWrapper(async (req, res) => {
     const recipes = await Recipe.find({}).populate('category, subcategory')
     res.status(200).json({ recipes })
-})
+});
+
+const getOneRecipe = asyncWrapper(async(req, res, next) => {
+    const {id} = req.params;
+    const recipe = await Recipe.findById(id).populate('category, subcategory')
+    if (!recipe) {
+        return next(createCustomError(`Recipe not found : ${id}`, 404))
+    }
+    res.status(200).json({recipe});
+});
 
 module.exports = { 
     createRecipe,
-    getAllRecipes
+    getAllRecipes,
+    getOneRecipe
 }

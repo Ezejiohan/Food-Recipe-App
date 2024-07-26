@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const {route} = require('./routes/users');
 const {ingredientRoute} = require('./routes/ingredients');
+const {recipeRoute} = require('./routes/recipes');
 
 const connectDB = require('./database/database');
 connectDB();
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/', route);
 app.use('/', ingredientRoute);
+app.use('/', recipeRoute);
 app.use(notFound);
 app.use(errorHandlerMiddleware);
 

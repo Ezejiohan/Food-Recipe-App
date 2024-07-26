@@ -111,12 +111,12 @@ const changePassword = asyncWrapper(async (req, res, next) => {
 
 const updateUser = asyncWrapper(async (req, res) => {
     const { id:userID } = req.params;
-    const user = await User.findByIdAndUpdate({ _id:userID }, req.body, {
+    const user = await User.findOneAndUpdate({ _id:userID }, req.body, {
         new: true,
         runValidators: true,
     });
     if (!user) {
-        return next(createCustomError("User not found", 404)) 
+        return next(createCustomError(`User not found : ${userID}`, 404)) 
     }
     res.status(200).json({user});
 });

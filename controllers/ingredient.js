@@ -21,9 +21,23 @@ const getOneIngredient = asyncWrapper(async (req, res, next) => {
         return next(createCustomError(`Ingredient not found : ${id}`, 404))
     }
     res.status(200).json({ ingredient })
+});
+
+const updateIngredient = asyncWrapper(async(req, res, next) => {
+    const {id:ingredientId} = req.params;
+    const ingredient = await Ingredient.findOneAndUpdate({_id:ingredientId}, req.body, {
+        new: true,
+        runValidators: true
+    });
+    if (!ingredient) {
+        return next(createCustomError(`Ingredient not found : ${ingredientId}`, 404))
+    }
+res.status(200).json({ingredient})
 })
+
 module.exports = {
     createIngredient,
     getAllIngredients,
-    getOneIngredient
+    getOneIngredient,
+    updateIngredient
 }

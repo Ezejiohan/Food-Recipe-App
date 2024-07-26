@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const recipeSchema = new mongoose.Schema({
-    recipename: {
+    recipeName: {
         type: String,
         required: true
     },
@@ -24,7 +24,7 @@ const recipeSchema = new mongoose.Schema({
         type: String,
         required: true
     }],
-    estimatedcookingtime: {
+    estimatedCookingTime: {
         type: Number,
         required: true
     },

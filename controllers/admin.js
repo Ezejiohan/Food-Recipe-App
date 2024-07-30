@@ -1,59 +1,59 @@
-const User = require('../models/user');
+const Admin = require('../models/admin');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const asyncWrapper = require('../middleware/async');
 const { createCustomError } = require('../errors/custom_error');
 const { SendEmail } = require('../utilities/nodemailer');
 
-const createUser = asyncWrapper(async (req, res) => {
+const createAdmin = asyncWrapper(async (req, res) => {
     const saltPassword = bcrypt.genSaltSync(10);
     const hashPassword = bcrypt.hashSync(req.body.password, saltPassword);
 
     const { fullname, email, password } = req.body;
-    const userExist = await User.findOne({
+    const adminExist = await Admin.findOne({
         email: req.body.email
     });
 
-    if (userExist) {
+    if (adminExist) {
         return res.status(403).json({
-            message: "User already Exist"
+            message: "Admin already Exist"
         })
     } else { 
-        const user = await User.create({
+        const admin = await Admin.create({
             fullname,
             email,
             password: hashPassword,
         })
-        res.status(201).json({user})
+        res.status(201).json({admin})
     }
-    const verificationLink = req.protocol + '://' + req.get("host") + '/api/users/' + newUser._id;
+    const verificationLink = req.protocol + '://' + req.get("host") + '/api/admins/' + newAdmin._id;
     const message = `Thanks for registring on our Food-Recipe. kindly click this link ${verificationLink} to verify your account`;
 
     SendEmail({
-        email: newUser.email,
+        email: newAdmin.email,
         subject: "verify your account",
         message
     })
-    res.status(200).json({ msg: 'User created Successful' });
+    res.status(200).json({ msg: 'Admin created Successful' });
 });
 
-const userLogin = asyncWrapper(async (req, res, next) => {
+const adminLogin = asyncWrapper(async (req, res, next) => {
     const loginRequest = { email: req.body.email, password: req.body.password }
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
+    const admin = await Admin.findOne({ email: req.body.email });
+    if (!admin) {
         return next(createCustomError("User not found", 404));
     } else {
-        const correctPassword = await bcrypt.compare(loginRequest.password, user.password);
+        const correctPassword = await bcrypt.compare(loginRequest.password, admin.password);
         if (correctPassword === false) {
             return next(createCustomError('Invalid email or password', 404))
         } else {
             const generatedToken = jwt.sign({
-                id: user._id,
-                email: user.email,
+                id: admin._id,
+                email: admin.email,
             }, process.env.TOKEN, { expiresIn: '12h' })
             const result = {
-                id: user._id,
-                email: user.email,
+                id: admin._id,
+                email: admin.email,
                 token: generatedToken
             }
             return res.status(200).json({ result });
@@ -61,44 +61,44 @@ const userLogin = asyncWrapper(async (req, res, next) => {
     }
 });
 
-const verifyUser = asyncWrapper(async (req, res, next) => {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-        return next(createCustomError(`User not found`, 404))
+const verifyAdmin = asyncWrapper(async (req, res, next) => {
+    const admin = await Admin.findById(req.params.id);
+    if (!admin) {
+        return next(createCustomError(`Admin not found`, 404))
     }
-    if (user.verified === true) {
+    if (admin.verified === true) {
         return res.status(400).json({
-            message: "User already verified"
+            message: "Admin already verified"
         });
     }
-    user.verified = true;
-    await user.save();
+    admin.verified = true;
+    await admin.save();
     res.status(200).json({
-        msg: 'User verified Successful',
-        data: user
+        msg: 'Admin verified Successful',
+        data: admin
     });
 });
-const getAllUsers = asyncWrapper(async (req, res) => {
-    const user = await User.find({})
-    res.status(200).json({ user });
+const getAllAdmin = asyncWrapper(async (req, res) => {
+    const admin = await Admin.find({})
+    res.status(200).json({ admin });
 });
 
-const getUser = asyncWrapper(async (req, res, next) => {
-    const { id: userID } = req.params;
-    const user = await User.findOne({ _id: userID });
-    if (!user) {
-        return next(createCustomError("User not found", 404));
+const getAdmin = asyncWrapper(async (req, res, next) => {
+    const { id: adminID } = req.params;
+    const admin = await Admin.findOne({ _id: userID });
+    if (!admin) {
+        return next(createCustomError("Admin not found", 404));
     }
-    res.status(200).json({ user });
+    res.status(200).json({ admin });
 });
 
 
 const changePassword = asyncWrapper(async (req, res, next) => {
 
     const { oldPassword, newPassword } = req.body;
-    const user = await User.findOne({ email: req.user.email });
+    const admin = await Amin.findOne({ email: req.admin.email });
 
-    const comparePassword = await bcrypt.compare(oldPassword, user.password);
+    const comparePassword = await bcrypt.compare(oldPassword, admin.password);
     if (comparePassword !== true) {
         return next(createCustomError(`Password incorrect`, 404))
     }
@@ -111,15 +111,15 @@ const changePassword = asyncWrapper(async (req, res, next) => {
     user.password = hashPassword;
 
     SendEmail({
-        email: user.email,
+        email: admin.email,
         subject: "Password change alert",
         message: "You have changed your password. If not you alert us"
     });
     const result = {
-        fullname: user.fullname,
+        fullname: admin.fullname,
         email: user.email
     }
-    await user.save();
+    await admin.save();
 
     return res.status(200).json({
         message: "Password changed successful",
@@ -127,33 +127,33 @@ const changePassword = asyncWrapper(async (req, res, next) => {
     });
 });
 
-const updateUser = asyncWrapper(async (req, res) => {
-    const { id: userID } = req.params;
-    const user = await User.findOneAndUpdate({ _id: userID }, req.body, {
+const updateAdmin = asyncWrapper(async (req, res) => {
+    const { id: adminID } = req.params;
+    const admin = await Admin.findOneAndUpdate({ _id: adminID }, req.body, {
         new: true,
         runValidators: true,
     });
-    if (!user) {
-        return next(createCustomError(`User not found : ${userID}`, 404))
+    if (!admin) {
+        return next(createCustomError(`Admin not found : ${adminID}`, 404))
     }
-    res.status(200).json({ user });
+    res.status(200).json({admin});
 });
 
 const forgotPassword = asyncWrapper(async (req, res, next) => {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-        return next(createCustomError(`User not found`, 404));
+    const admin = await Admin.findOne({ email: req.body.email });
+    if (!admin) {
+        return next(createCustomError(`Admin not found`, 404));
     }
     const token = jwt.sign({
-        id: user._id,
-        email: user.email
+        id: admin._id,
+        email: admin.email
     }, process.env.TOKEN)
 
-    const passwordChangeLink = `${req.protocol}://${req.get("host")}/api/user/change_password/${user._id}/${token}`;
+    const passwordChangeLink = `${req.protocol}://${req.get("host")}/api/admins/change_password/${admin._id}/${token}`;
     const message = `Click this link: ${passwordChangeLink} to set a new password`;
 
     SendEmail({
-        email: user.email,
+        email: admin.email,
         subject: 'Forget password link',
         message: message
     });
@@ -165,9 +165,9 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
 
 const resetPassword = asyncWrapper(async (req, res, next) => {
     const { newPassword, confirmPassword } = req.body;
-    const user = await User.findById(req.params.id);
-    if (!user) {
-        return next(createCustomError(`User not found`, 404));
+    const admin = await Admin.findById(req.params.id);
+    if (!admin) {
+        return next(createCustomError(`Admin not found`, 404));
     }
 
     if (newPassword !== confirmPassword) {
@@ -179,11 +179,11 @@ const resetPassword = asyncWrapper(async (req, res, next) => {
     const saltPassword = bcrypt.genSaltSync(10);
     const hashPassword = bcrypt.hashSync(newPassword, saltPassword);
 
-    const updatePassword = await User.findByIdAndUpdate(req.params.id, {
+    const updatePassword = await Admin.findByIdAndUpdate(req.params.id, {
         password: hashPassword
     });
 
-    await user.save();
+    await admin.save();
 
     res.status(200).json({
         message: 'Password updated successfully',
@@ -192,13 +192,13 @@ const resetPassword = asyncWrapper(async (req, res, next) => {
 });
 
 module.exports = {
-    createUser,
-    userLogin,
-    verifyUser,
-    getAllUsers,
-    getUser,
+    createAdmin,
+    adminLogin,
+    verifyAdmin,
+    getAllAdmin,
+    getAdmin,
     changePassword,
-    updateUser,
+    updateAdmin,
     forgotPassword,
     resetPassword
 }

@@ -11,9 +11,9 @@ const recipeSchema = new mongoose.Schema({
             required: true
         }
     ],
-    user: {
+    admin: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Admin',
         required: true
     },
     category: {

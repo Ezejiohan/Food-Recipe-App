@@ -3,6 +3,8 @@ const express = require('express');
 const {route} = require('./routes/users');
 const {ingredientRoute} = require('./routes/ingredients');
 const {recipeRoute} = require('./routes/recipes');
+const {adminRoute} = require('./routes/admins');
+const {reviewRoute} = require('./routes/reviews');
 
 const connectDB = require('./database/database');
 connectDB();
@@ -16,6 +18,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/', route);
 app.use('/', ingredientRoute);
 app.use('/', recipeRoute);
+app.use('/', adminRoute);
+app.use('/', reviewRoute);
 app.use(notFound);
 app.use(errorHandlerMiddleware);
 

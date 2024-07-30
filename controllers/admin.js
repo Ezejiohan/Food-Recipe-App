@@ -78,7 +78,7 @@ const verifyAdmin = asyncWrapper(async (req, res, next) => {
         data: admin
     });
 });
-const getAllAdmin = asyncWrapper(async (req, res) => {
+const getAllAdmins = asyncWrapper(async (req, res) => {
     const admin = await Admin.find({})
     res.status(200).json({ admin });
 });
@@ -195,7 +195,7 @@ module.exports = {
     createAdmin,
     adminLogin,
     verifyAdmin,
-    getAllAdmin,
+    getAllAdmins,
     getAdmin,
     changePassword,
     updateAdmin,

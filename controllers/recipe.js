@@ -1,7 +1,7 @@
 const Recipe = require('../models/recipe');
 const Admin = require('../models/admin');
 const asyncWrapper = require('../middleware/async');
-const {createCustomError} = require('../errors/custom_error');
+const {createCustomError} = require('../errors/custom_error.js');
 
 const createRecipe = asyncWrapper(async(req, res) => {
     const { recipeName, admin, category, ingredient, steps, estimatedCookingTime, serving} = req.body; 

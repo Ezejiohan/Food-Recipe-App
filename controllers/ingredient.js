@@ -1,6 +1,6 @@
 const Ingredient = require('../models/ingredient');
 const asyncWrapper = require('../middleware/async');
-const {createCustomError} = require('../errors/custom_error');
+const {createCustomError} = require('../errors/custom_error.js');
 
 const createIngredient = asyncWrapper(async (req, res) => {
     const { name, quantity } = req.body;

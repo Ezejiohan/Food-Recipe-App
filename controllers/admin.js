@@ -2,7 +2,7 @@ const Admin = require('../models/admin');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const asyncWrapper = require('../middleware/async');
-const { createCustomError } = require('../errors/custom_error');
+const { createCustomError } = require('../errors/custom_error.js');
 const { SendEmail } = require('../utilities/nodemailer');
 
 const createAdmin = asyncWrapper(async (req, res) => {

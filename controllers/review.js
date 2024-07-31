@@ -1,7 +1,7 @@
 const Review = require('../models/review');
 const Recipe = require('../models/recipe');
 const asyncWrapper = require('../middleware/async');
-const { createCustomError } = require('../errors/custom_error');
+const { createCustomError } = require('../errors/custom_error.js');
 
 const createReview = asyncWrapper(async (req, res, next) => {
     const { recipeId } = req.params;

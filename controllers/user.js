@@ -2,7 +2,7 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const asyncWrapper = require('../middleware/async');
-const { createCustomError } = require('../errors/custom_error');
+const { createCustomError } = require('../errors/custom_error.js');
 const { SendEmail } = require('../utilities/nodemailer');
 
 const createUser = asyncWrapper(async (req, res) => {

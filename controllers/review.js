@@ -27,4 +27,9 @@ const createReview = asyncWrapper(async (req, res, next) => {
     res.status(201).json({ review });
 });
 
-module.exports = { createReview };
+const getAllReviews = asyncWrapper(async (req, res) => {
+    const review = await Review.find({})
+    res.status(200).json({review})
+})
+
+module.exports = { createReview, getAllReviews };

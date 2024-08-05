@@ -3,8 +3,8 @@ const asyncWrapper = require('../middleware/async');
 const {createCustomError} = require('../errors/custom_error.js');
 
 const createIngredient = asyncWrapper(async (req, res) => {
-    const { name, quantity } = req.body;
-    const ingredient = await Ingredient.create({ name, quantity });
+    const { name } = req.body;
+    const ingredient = await Ingredient.create({ name });
     await ingredient.save();
     res.status(201).json({ ingredient })
 });

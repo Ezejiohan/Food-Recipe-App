@@ -30,6 +30,15 @@ const createReview = asyncWrapper(async (req, res, next) => {
 const getAllReviews = asyncWrapper(async (req, res) => {
     const review = await Review.find({})
     res.status(200).json({review})
-})
+});
 
-module.exports = { createReview, getAllReviews };
+const getOneReview = asyncWrapper(async (req, res, next) => {
+    const { id } = req.params;
+    const review = await Review.findById(id);
+    if (!review) {
+        return next(createCustomError(`Review not found with ID: ${id}`, 404));
+    }
+    res.status(200).json({ review });
+});
+
+module.exports = { createReview, getAllReviews, getOneReview };

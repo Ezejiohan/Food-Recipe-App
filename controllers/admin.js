@@ -3,39 +3,43 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const asyncWrapper = require('../middleware/async');
 const { createCustomError } = require('../errors/custom_error.js');
-const { SendEmail } = require('../utilities/nodemailer');
+const { sendEmail } = require('../utilities/nodemailer');
 
 const createAdmin = asyncWrapper(async (req, res) => {
-    const saltPassword = bcrypt.genSaltSync(10);
-    const hashPassword = bcrypt.hashSync(req.body.password, saltPassword);
-
     const { fullname, email, password } = req.body;
-    const adminExist = await Admin.findOne({
-        email: req.body.email
+
+    // Check if admin already exists
+    const adminExist = await Admin.findOne({ email });
+    if (adminExist) {
+        return res.status(403).json({ message: "Admin already exists" });
+    }
+
+    // Hash the password
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(password, salt);
+
+    // Create new admin
+    const newAdmin = await Admin.create({
+        fullname,
+        email,
+        password: hashedPassword,
     });
 
-    if (adminExist) {
-        return res.status(403).json({
-            message: "Admin already Exist"
-        })
-    } else { 
-        const admin = await Admin.create({
-            fullname,
-            email,
-            password: hashPassword,
-        })
-        res.status(201).json({admin})
-    }
-    const verificationLink = req.protocol + '://' + req.get("host") + '/api/admins/' + newAdmin._id;
-    const message = `Thanks for registring on our Food-Recipe. kindly click this link ${verificationLink} to verify your account`;
+    // Generate verification link
+    const verificationLink = `https://food-recipe-7hlg.onrender.com/admins/verifyAdmin/${newAdmin._id}`;
+    const message = `Thanks for registering on Food-Recipe App. Please click the link below to verify your account:\n${verificationLink}`;
 
-    SendEmail({
+    // Email options and sending verification email
+    const mailOptions = {
         email: newAdmin.email,
-        subject: "verify your account",
-        message
-    })
-    res.status(200).json({ msg: 'Admin created Successful' });
+        subject: "Welcome to Food_Recipe App",
+        message,
+    };
+    await sendEmail(mailOptions);
+
+    res.status(201).json({ msg: 'Admin created successfully', admin: newAdmin });
 });
+
 
 const adminLogin = asyncWrapper(async (req, res, next) => {
     const loginRequest = { email: req.body.email, password: req.body.password }
@@ -78,6 +82,7 @@ const verifyAdmin = asyncWrapper(async (req, res, next) => {
         data: admin
     });
 });
+
 const getAllAdmins = asyncWrapper(async (req, res) => {
     const admin = await Admin.find({})
     res.status(200).json({ admin });
@@ -96,7 +101,7 @@ const getAdmin = asyncWrapper(async (req, res, next) => {
 const changePassword = asyncWrapper(async (req, res, next) => {
 
     const { oldPassword, newPassword } = req.body;
-    const admin = await Amin.findOne({ email: req.admin.email });
+    const admin = await Admin.findOne({ email: req.admin.email });
 
     const comparePassword = await bcrypt.compare(oldPassword, admin.password);
     if (comparePassword !== true) {
@@ -108,16 +113,16 @@ const changePassword = asyncWrapper(async (req, res, next) => {
     if (newPassword === oldPassword) {
         return next(createCustomError(`Unauthorised`, 404))
     }
-    user.password = hashPassword;
+    admin.password = hashPassword;
 
-    SendEmail({
+    sendEmail({
         email: admin.email,
         subject: "Password change alert",
         message: "You have changed your password. If not you alert us"
     });
     const result = {
         fullname: admin.fullname,
-        email: user.email
+        email: admin.email
     }
     await admin.save();
 
@@ -149,10 +154,10 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
         email: admin.email
     }, process.env.TOKEN)
 
-    const passwordChangeLink = `${req.protocol}://${req.get("host")}/api/admins/change_password/${admin._id}/${token}`;
+    const passwordChangeLink = `${req.protocol}://${req.get("host")}/admins/change_password/${admin._id}/${token}`;
     const message = `Click this link: ${passwordChangeLink} to set a new password`;
 
-    SendEmail({
+    sendEmail({
         email: admin.email,
         subject: 'Forget password link',
         message: message

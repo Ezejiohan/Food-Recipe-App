@@ -4,15 +4,15 @@ const sendEmail = async (options) => {
     const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-            user: "ezejiohan@gmail.com",
-            pass: "otkiovtlexmumkqy"
+            user: process.env.APP_EMAIL,
+            pass: process.env.APP_PASSWORD
         }
     });
 
     let mailOptions = {
         from: {
             name: "Food-Recipe App",
-            address: "ezejiohan@gmail.com"
+            address: process.env.APP_EMAIL
         },
         to: options.email,
         subject: options.subject,

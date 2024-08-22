@@ -1,31 +1,38 @@
 const Review = require('../models/review');
 const Recipe = require('../models/recipe');
 const asyncWrapper = require('../middleware/async');
-const { createCustomError } = require('../errors/custom_error.js');
+const { createCustomError } = require('../errors/custom_error'); // Custom error handling
 
+// Create a review controller
 const createReview = asyncWrapper(async (req, res, next) => {
     const { recipeId } = req.params;
-    const { rating, comment } = req.body;
-
+    const { userId } = req.body; 
+    const { rating, comment } = req.body; 
+    
     const recipe = await Recipe.findById(recipeId);
     if (!recipe) {
-        return next(createCustomError(`Recipe not found: ${recipeId}`, 404));
+        return next(createCustomError('Recipe not found', 404));
     }
 
+    const existingReview = await Review.findOne({ recipe: recipeId, user: userId });
+    if (existingReview) {
+        return res.status(400).json({ message: 'User has already reviewed this recipe' });
+    }
     const review = await Review.create({
-        user: req.user._id,
         recipe: recipeId,
+        user: userId,
         rating,
         comment
     });
 
-    await review.save();
-    
-    recipe.reviews.push(review._id);
-    await recipe.save();
-
-    res.status(201).json({ review });
+    res.status(201).json({
+        message: 'Review created successfully',
+        review
+    });
 });
+
+module.exports = { createReview };
+
 
 const getAllReviews = asyncWrapper(async (req, res) => {
     const review = await Review.find({})

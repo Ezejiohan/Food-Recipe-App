@@ -1,9 +1,8 @@
 const Review = require('../models/review');
 const Recipe = require('../models/recipe');
 const asyncWrapper = require('../middleware/async');
-const { createCustomError } = require('../errors/custom_error'); // Custom error handling
+const { createCustomError } = require('../errors/custom_error');
 
-// Create a review controller
 const createReview = asyncWrapper(async (req, res, next) => {
     const { recipeId } = req.params;
     const { userId } = req.body; 
@@ -30,9 +29,6 @@ const createReview = asyncWrapper(async (req, res, next) => {
         review
     });
 });
-
-module.exports = { createReview };
-
 
 const getAllReviews = asyncWrapper(async (req, res) => {
     const review = await Review.find({})

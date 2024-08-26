@@ -5,10 +5,10 @@ const {createCustomError} = require('../errors/custom_error.js');
 
 const createRecipe = asyncWrapper(async(req, res) => {
     const { recipeName, admin, category, ingredient, steps, estimatedCookingTime, serving} = req.body; 
-    const {id: adminID} = req.params;
-    const admins = await Admin.findById({_id:adminID});
+    const {adminId} = req.params;
+    const admins = await Admin.findById(adminId);
     if (!admins) {
-        return next(createCustomError(`Admin not found : ${adminID}`, 404))
+        return next(createCustomError(`Admin not found : ${adminId}`, 404))
     }
     const recipe = await Recipe.create({recipeName, admin, category, ingredient, steps, estimatedCookingTime, serving})
     await recipe.save();

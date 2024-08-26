@@ -5,7 +5,7 @@ const asyncWrapper = require('../middleware/async');
 const { createCustomError } = require('../errors/custom_error.js');
 const { SendEmail } = require('../utilities/nodemailer');
 
-const createUser = asyncWrapper(async (req, res) => {
+const createUser = asyncWrapper(async (req, res, next) => {
     const saltPassword = bcrypt.genSaltSync(10);
     const hashPassword = bcrypt.hashSync(req.body.password, saltPassword);
 
@@ -15,9 +15,7 @@ const createUser = asyncWrapper(async (req, res) => {
     });
 
     if (userExist) {
-        return res.status(403).json({
-            message: "User already Exist"
-        })
+        return next(createCustomError("User already Exist", 403))
     } else { 
         const user = await User.create({
             fullname,
@@ -64,28 +62,25 @@ const userLogin = asyncWrapper(async (req, res, next) => {
 const verifyUser = asyncWrapper(async (req, res, next) => {
     const user = await User.findById(req.params.id);
     if (!user) {
-        return next(createCustomError(`User not found`, 404))
+        return next(createCustomError(`User not found`, 404));
     }
     if (user.verified === true) {
-        return res.status(400).json({
-            message: "User already verified"
-        });
+        return next(createCustomError(`User already verified`, 400));
     }
     user.verified = true;
     await user.save();
-    res.status(200).json({
-        msg: 'User verified Successful',
-        data: user
-    });
+    const newUser = await User.findByIdAndUpdate(id, {isVerified: true}, {new: true})
+    res.status(200).json({newUser});
 });
+
 const getAllUsers = asyncWrapper(async (req, res) => {
     const user = await User.find({})
     res.status(200).json({ user });
 });
 
 const getUser = asyncWrapper(async (req, res, next) => {
-    const { id: userID } = req.params;
-    const user = await User.findOne({ _id: userID });
+    const {id} = req.params;
+    const user = await User.findOne(id);
     if (!user) {
         return next(createCustomError("User not found", 404));
     }

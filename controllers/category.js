@@ -1,10 +1,11 @@
 const Category = require('../models/category');
 const asyncWrapper = require('../middleware/async');
+const { createCustomError } = require('../errors/custom_error');
 
-const createCategory = asyncWrapper(async (req, res) => {
+const createCategory = asyncWrapper(async (req, res, next) => {
     const { category_name } = req.body;
     if (!category_name) {
-        return res.status(400).json({ error: 'Category name is required' });
+        return next(createCustomError(`Category name is required`, 400));
     }
 
     const category = await Category.create({ category_name });
@@ -13,4 +14,11 @@ const createCategory = asyncWrapper(async (req, res) => {
     res.status(201).json({ category });
 });
 
-module.exports = { createCategory };
+const getAllCategorys = asyncWrapper(async (req, res) => {
+    const category = await Category.find({})
+    res.status(200).json({category})
+})
+
+module.exports = { createCategory,
+    getAllCategorys
+ };

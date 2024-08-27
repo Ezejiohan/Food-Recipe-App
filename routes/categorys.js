@@ -1,9 +1,13 @@
 const express = require('express');
-const { createCategory } = require('../controllers/categoryController'); // Import the createCategory controller
+const { createCategory, 
+    getAllCategorys 
+} = require('../controllers/category');
+const { authenticate } = require('../middleware/adminAuthentication');
 
 const categoryRouter = express.Router();
 
 // Route to create a new category
-categoryRouter.post('/create', createCategory);
+categoryRouter.post('/categorys', authenticate, (createCategory));
+categoryRouter.get('/categorys/getAllCategorys', authenticate, (getAllCategorys))
 
 module.exports = categoryRouter;

@@ -5,13 +5,13 @@ const asyncWrapper = require('../middleware/async');
 const { createCustomError } = require('../errors/custom_error.js');
 const { sendEmail } = require('../utilities/nodemailer');
 
-const createAdmin = asyncWrapper(async (req, res) => {
+const createAdmin = asyncWrapper(async (req, res, next) => {
     const { fullname, email, password } = req.body;
 
     // Check if admin already exists
     const adminExist = await Admin.findOne({ email });
     if (adminExist) {
-        return res.status(403).json({ message: "Admin already exists" });
+        return next(createCustomError(`"Admin already exists`, 403))
     }
 
     // Hash the password
@@ -71,9 +71,7 @@ const verifyAdmin = asyncWrapper(async (req, res, next) => {
         return next(createCustomError(`Admin not found`, 404))
     }
     if (admin.verified === true) {
-        return res.status(400).json({
-            message: "Admin already verified"
-        });
+        return next(createCustomError(`Admin already verified`, 400))
     }
     admin.verified = true;
     await admin.save();
@@ -89,8 +87,8 @@ const getAllAdmins = asyncWrapper(async (req, res) => {
 });
 
 const getAdmin = asyncWrapper(async (req, res, next) => {
-    const { id: adminID } = req.params;
-    const admin = await Admin.findOne({ _id: userID });
+    const {id} = req.params;
+    const admin = await Admin.findOne(id);
     if (!admin) {
         return next(createCustomError("Admin not found", 404));
     }
@@ -176,9 +174,7 @@ const resetPassword = asyncWrapper(async (req, res, next) => {
     }
 
     if (newPassword !== confirmPassword) {
-        return res.status(403).json({
-            message: 'There is a difference in both password'
-        });
+        return next(createCustomError(`There is a difference in both password`, 403))
     }
 
     const saltPassword = bcrypt.genSaltSync(10);
